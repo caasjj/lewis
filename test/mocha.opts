@@ -1,0 +1,4 @@
+--timeout 6000
+--reporter spec
+--ui bdd
+test/es5/*.test.js
