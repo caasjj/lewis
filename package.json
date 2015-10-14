@@ -4,7 +4,7 @@
   "description": "A Redis Lua script loader in ES2015",
   "main": "index.js",
   "scripts": {
-    "compileAndTest": "npm run compile-test && ./node_modules/mocha/bin/mocha",
+    "compile-and-test": "npm run compile-test && ./node_modules/mocha/bin/mocha",
     "test": "./node_modules/mocha/bin/mocha",
     "compile": "node_modules/.bin/babel src --modules common --out-dir lib  --source-maps true",
     "compile-example": "node_modules/.bin/babel example --modules common --out-dir lib  --source-maps true",
