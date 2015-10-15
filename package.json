@@ -10,7 +10,8 @@
     "compile-example": "node_modules/.bin/babel example --modules common --out-dir lib  --source-maps true",
     "watch": "node_modules/.bin/babel src --watch --modules common --out-dir lib --source-maps true",
     "prepublish": "npm run compile && npm prune",
-    "compile-test": "node_modules/.bin/babel test --ignore test/es5 --modules common --out-dir test/es5  --source-maps true"
+    "compile-test": "node_modules/.bin/babel test --ignore test/es5 --modules common --out-dir test/es5  --source-maps true",
+    "postinstall": "npm run compile && npm run compile-example && npm run compile-test"
   },
   "repository": {
     "type": "git",
