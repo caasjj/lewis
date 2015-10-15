@@ -26,7 +26,7 @@ class Lewis {
 		var args = Array.prototype.slice
 										.call( arguments, 1, Math.inf )
 
-		script = path.basename(script, '.lua')
+		script = path.basename( script, '.lua' )
 
 		if (!this.scripts[script]) {
 			return Promise.reject( new OperationalError( `script ${script} not found.` ) )
@@ -35,12 +35,17 @@ class Lewis {
 		args.unshift( this.scripts[script].keys )
 		args.unshift( this.scripts[script].sha1 )
 
-		return this.redis.evalshaAsync.apply( this.redis, args )
-							 .error( err => {
-								 var errCode =  /ERR_[A-Z,_]*\s*$/.exec( err.cause.message )
-								 var error = errCode ? new OperationalError( errCode[0].replace( /\s*$/, '' ) ) : err
-								 return Promise.reject( error )
-							 } )
+		try {
+			return this.redis.evalshaAsync.apply( this.redis, args )
+								 .error( err => {
+									 var errCode = /ERR_[A-Z,_]*\s*$/.exec( err.cause.message )
+									 var error = errCode ? new OperationalError( errCode[0].replace( /\s*$/, '' ) ) : err
+									 return Promise.reject( error )
+								 } )
+		} catch (err) {
+			return Promise.reject( new Error( 'ERR_REDIS' ) )
+		}
+
 	}
 
 	load(dir, fileArray) {
@@ -61,7 +66,7 @@ class Lewis {
 
 	static loaddir(dir) {
 
-		if (typeof(dir) !== `string`) return Promise.reject( new OperationalError('Path must a string'))
+		if (typeof(dir) !== `string`) return Promise.reject( new OperationalError( 'Path must a string' ) )
 
 		return readdirP( dir )
 			.then( files => {
@@ -73,21 +78,21 @@ class Lewis {
 			}) ) )
 			.then( files => {
 				return (files.length) ? files : Promise.reject( new OperationalError( 'No Lua scripts found' ) )
-			})
+			} )
 	}
 
 	static loadfiles(dir, files) {
 		files = Array.isArray( files ) ? files : [files]
-		return Promise.resolve(files)
-									.filter( function(file)  {
-											return Lewis.filterLua( file )
+		return Promise.resolve( files )
+									.filter( function (file) {
+										return Lewis.filterLua( file )
 									} )
 									.map( file => {
 										return {
 											filePath: dir,
 											fileName: path.basename( file )
 										}
-									})
+									} )
 									.then( files => {
 										return (files.length) ? files : Promise.reject( new OperationalError( 'No Lua scripts found' ) )
 									} )
@@ -132,6 +137,7 @@ class Lewis {
 									} )
 									.then( shaArray => {
 										return this.redis.scriptAsync( 'exists', shaArray )
+															 .catch( err => Promise.reject( new Error( 'ERR_REDIS' ) ) )
 									} )
 									.then( existFlags => {
 										return scriptNames.filter( (scriptName, index) => existFlags[index] ? false : true )
@@ -147,14 +153,15 @@ class Lewis {
 		return Promise.all( scripts.map( script => {
 
 			return this.redis.scriptAsync( 'load', script.code )
-					.then( sha1 => {
-						if (sha1 !== script.sha1) {
-							return Promise.reject(
-								new OperationalError( `loaded sha1 ${sha1} mismatch with script ${script.name} sha1 of ${script.sha1}` )
-							)
-						}
-						return script
-					} )
+								 .then( sha1 => {
+									 if (sha1 !== script.sha1) {
+										 return Promise.reject(
+											 new OperationalError( `loaded sha1 ${sha1} mismatch with script ${script.name} sha1 of ${script.sha1}` )
+										 )
+									 }
+									 return script
+								 } )
+								 .catch( err => Promise.reject( new Error( 'ERR_REDIS' ) ) )
 
 		} ) )
 	}

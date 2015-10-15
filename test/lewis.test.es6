@@ -5,6 +5,7 @@ import Redis from 'redis'
 import path from 'path'
 import Promise from 'bluebird'
 import Lewis from '../../lib/lewis.js'
+import Proxy from '../../lib/proxy.js'
 
 function rel(p) {
 	return path.resolve( __dirname, '' + p )
@@ -340,11 +341,45 @@ describe( `Lewis`, () => {
 									.then( () => done() )
 		})
 
-		it('should reject a promise with error type indicated in the script', () => {
+		it(`should reject a promise with error type indicated in the script`, () => {
 			var result = lewis.run('send-err')
 
 			expect( result ).to.be.rejectedWith( Promise.OperationalError, `ERR_CAUSE_JUST_BECAUSE`)
 		})
+
+		describe(`redis connection error`, () => {
+
+			var lewis, scriptsLoaded
+
+			Proxy.listen(12345)
+			// load a script to redis before this test
+			before( done => {
+
+				var proxyRedis = Redis.createClient(12345)
+				lewis = new Lewis( proxyRedis )
+
+				scriptsLoaded =Lewis.loadfiles( rel( `../lua`), [`set-key.lua`]  )
+														.then( f => lewis.readFiles( f ) )
+														.then( f => lewis.loadScripts( f ) )
+														.then( f => {done(); return f } )
+			} )
+
+			// flush the scripts after done in prep for subsequent tests
+			after( done => {
+				return redis.scriptAsync('flush')
+										.then( () => done() )
+			})
+
+			it(`should reject with 'ERR_REDIS' if redis connection fails`, () => {
+
+				Proxy.fail()
+
+				expect( lewis.run('set-key', 'foo', 'bar') ).to.be.rejectedWith( Error, `ERR_REDIS`)
+
+			})
+		})
+
 	})
+
 
 } )

@@ -1,2 +1,2 @@
-require('./lib/lewis.js')
+module.exports = require('./lib/lewis.js')
 
