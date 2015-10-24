@@ -51,7 +51,7 @@ describe( `Lewis`, () => {
 		it( `'constructor' should throw without redis`, () => {
 
 			function badLewis() {
-				return new Lewis()
+				return Lewis()
 			}
 
 			expect( badLewis ).to.throw( Promise.OperationalError )
@@ -60,7 +60,7 @@ describe( `Lewis`, () => {
 
 		it( `should create successfully with redis`, () => {
 
-			var lewis = new Lewis( redis )
+			var lewis = Lewis( redis )
 			expect( lewis ).to.be.an.instanceOf( Lewis )
 			expect( lewis.scripts ).to.be.empty
 
@@ -127,7 +127,7 @@ describe( `Lewis`, () => {
 
 		it( `'readFiles' should read list of lua script files`, () => {
 
-			var lewis = new Lewis( redis )
+			var lewis = Lewis( redis )
 			var files = [`get-key.lua`, `set-key.lua`]
 			var scriptNames = files.map( file => path.basename( file, '.lua' ) ) // strip .lua from file name
 
@@ -148,7 +148,7 @@ describe( `Lewis`, () => {
 		} )
 
 		it( `'readFiles' should throw an OperationalError if a lua script cannot be located`, () => {
-			var lewis = new Lewis( redis )
+			var lewis = Lewis( redis )
 			var files = [`set-key.lua`, `get-key.lua`, `non-existent.lua`]
 
 			var scriptsObj = Lewis.loadfiles( rel( `../lua` ), files )
@@ -167,7 +167,7 @@ describe( `Lewis`, () => {
 
 		// load a script to redis before this test
 		before( done => {
-			lewis = new Lewis( redis )
+			lewis = Lewis( redis )
 
 			scriptsLoaded = Lewis.loadfiles( rel( `../lua` ), [`get-key.lua`] )
 													 .then( f => lewis.readFiles( f ) )
@@ -204,7 +204,7 @@ describe( `Lewis`, () => {
 
 		// load a script to redis before this test
 		before( done => {
-			lewis = new Lewis( redis )
+			lewis = Lewis( redis )
 
 			scriptsLoaded =Lewis.loaddir( rel( `../lua` ) )
 													 .then( f => lewis.readFiles( f ) )
@@ -242,7 +242,7 @@ describe( `Lewis`, () => {
 
 		// load a script to redis before this test
 		before( done => {
-			lewis = new Lewis( redis )
+			lewis = Lewis( redis )
 
 			scriptsLoaded =Lewis.loaddir( rel( `../lua`), [`get-key.lua`, `set-key.lua`]  )
 													.then( f => lewis.readFiles( f ) )
@@ -280,7 +280,7 @@ describe( `Lewis`, () => {
 
 		// load a script to redis before this test
 		before( done => {
-			lewis = new Lewis( redis )
+			lewis = Lewis( redis )
 
 			scriptsLoaded =Lewis.loadfiles( rel( `../lua`), [`get-key.lua`, `set-key.lua`]  )
 													.then( f => lewis.readFiles( f ) )
@@ -327,7 +327,7 @@ describe( `Lewis`, () => {
 
 		// load a script to redis before this test
 		before( done => {
-			lewis = new Lewis( redis )
+			lewis = Lewis( redis )
 
 			scriptsLoaded =Lewis.loadfiles( rel( `../lua`), [`send-err.lua`]  )
 													.then( f => lewis.readFiles( f ) )
@@ -356,7 +356,7 @@ describe( `Lewis`, () => {
 			before( done => {
 
 				var proxyRedis = Redis.createClient(12345)
-				lewis = new Lewis( proxyRedis )
+				lewis = Lewis( proxyRedis )
 
 				scriptsLoaded =Lewis.loadfiles( rel( `../lua`), [`set-key.lua`]  )
 														.then( f => lewis.readFiles( f ) )

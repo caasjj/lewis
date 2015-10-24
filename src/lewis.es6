@@ -35,6 +35,7 @@ class Lewis {
 		args.unshift( this.scripts[script].keys )
 		args.unshift( this.scripts[script].sha1 )
 
+		// fixme: this try catch block is totally unnecessary ... needs to be removed and retested
 		try {
 			return this.redis.evalshaAsync.apply( this.redis, args )
 								 .error( err => {
@@ -187,4 +188,6 @@ class Lewis {
 
 }
 
-export {Lewis as default}
+export function f(opt) {
+  return new Lewis(opt)
+}

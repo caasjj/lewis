@@ -9,9 +9,15 @@ a promise based script loader for Redis written in ES2015
 
 
 Loading and running scripts is as simple as: 
-   
+ 
+         // import the module 
+         let Lewis =  require('Lewis') 
+
+	// or better yet, use 'import' if transpiling, using jspm, etc.
+        import Lewis form 'lewis'
+ 
 	 // create a loader, injecting in a redis client
- 	 let lewis = new Lewis( redis ) 
+ 	 let lewis = Lewis( redis ) 
 
 	// you have a script 'scriptName.lua' in directory 'dirPath' that takes in 2 keys and 2 arguments
     lewis.load( dirPath )
